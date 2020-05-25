@@ -3,4 +3,5 @@ env = Environment(
 )
 Export('env')
 
-SConscript(dirs=['examples'], variant_dir='build')
+for subdir in ['src', 'examples']:
+    env.SConscript(dirs=[subdir], variant_dir='build/' + subdir, duplicate=False)

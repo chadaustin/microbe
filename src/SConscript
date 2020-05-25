@@ -1,0 +1,3 @@
+Import('*')
+
+env.Library('microbe', ['microbe.cpp'])

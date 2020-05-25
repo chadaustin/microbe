@@ -1,2 +1,3 @@
 Import('*')
+env = env.Clone(LIBPATH=['#/build/src'], LIBS=['microbe'])
 env.Program('basic', ['basic.cpp'])
