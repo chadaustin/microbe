@@ -1,5 +1,6 @@
 env = Environment(
     CPPPATH=['#/include'],
+    CCFLAGS=['-O2'],
 )
 Export('env')
 

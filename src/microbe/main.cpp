@@ -1,5 +1,7 @@
 #include "microbe.h"
 
+#include "microbe/timer.h"
+
 #include <vector>
 #include <stdio.h>
 
@@ -22,6 +24,9 @@ BenchmarkRegistrar::BenchmarkRegistrar(const char *name, void (*fn)()) {
 
 int runMain(int argc, char **argv) {
     printf("in runmain\n");
+
+    selectTimer();
+
     printf("size: %d\n", (int)g_benchmarks.size());
     for (const auto& bm : g_benchmarks) {
         printf("Running %s\n", bm.name);

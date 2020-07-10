@@ -1,3 +1,7 @@
 Import('*')
 
-env.Library('microbe', ['microbe.cpp'])
+env = env.Copy()
+env.Append(
+    CPPPATH=['.'])
+
+env.Library('microbe', ['microbe/main.cpp', 'microbe/timer.cpp'])
