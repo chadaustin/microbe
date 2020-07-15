@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <time.h>
 
+#include <sched.h>
+
 #include "microbe/port.h"
 
 namespace {
@@ -23,8 +25,8 @@ int64_t unix_monotonic_clock() {
   timespec ts;
   int res = clock_gettime(CLOCK_MONOTONIC, &ts);
   if (MICROBE_UNLIKELY(res)) {
-      perror("clock_gettime(CLOCK_MONOTONIC) failed");
-      abort();
+    perror("clock_gettime(CLOCK_MONOTONIC) failed");
+    abort();
   }
   return 1000000000 * ts.tv_sec + ts.tv_nsec;
 }
@@ -33,8 +35,8 @@ int64_t unix_monotonic_clock_raw() {
   timespec ts;
   int res = clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
   if (MICROBE_UNLIKELY(res)) {
-      perror("clock_gettime(CLOCK_MONOTONIC_RAW) failed");
-      abort();
+    perror("clock_gettime(CLOCK_MONOTONIC_RAW) failed");
+    abort();
   }
   return 1000000000 * ts.tv_sec + ts.tv_nsec;
 }
@@ -101,11 +103,53 @@ void evaluateTimer(const Timer &timer) {
   printf("  monotonic? %s\n", monotonic ? "yes" : "no");
 }
 
+struct AffinityScope {
+  AffinityScope() {
+    if (-1 ==
+        sched_getaffinity(0, sizeof(previous_cpu_set_), &previous_cpu_set_)) {
+      perror("sched_getaffinty failed");
+      abort();
+    }
+
+    // TODO: read sysfs /sys/devices/system/cpu/kernel_max to dynamically
+    // determine maximum number of CPUs supported by kernel For now, assume
+    // cpu_set_t is big enough.
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+
+    // Assume the CPU currently scheduled is appropriate, since it was chosen to
+    // run the process until now.
+    unsigned cpu = sched_getcpu();
+    if (-1 == cpu) {
+      perror("sched_getcpu failed");
+      abort();
+    }
+    CPU_SET(cpu, &cpuset);
+
+    if (-1 == sched_setaffinity(0, sizeof(cpuset), &cpuset)) {
+      perror("sched_setaffinity failed");
+      abort();
+    }
+  }
+
+  ~AffinityScope() {
+    if (-1 ==
+        sched_setaffinity(0, sizeof(previous_cpu_set_), &previous_cpu_set_)) {
+      perror("sched_setaffinity failed");
+      abort();
+    }
+  }
+
+  cpu_set_t previous_cpu_set_;
+};
+
 } // namespace
 
 namespace microbe {
 
 void selectTimer() {
+  AffinityScope scope;
+
   for (const auto &timer : gTimers) {
     evaluateTimer(timer);
   }
