@@ -11,24 +11,22 @@ struct Benchmark {
   void (*fn)();
 };
 
-std::vector<Benchmark> g_benchmarks;
+std::vector<Benchmark>& accessBenchmarks() {
+  static std::vector<Benchmark> benchmarks;
+  return benchmarks;
+}
 } // namespace
 
 namespace microbe {
 
 BenchmarkRegistrar::BenchmarkRegistrar(const char *name, void (*fn)()) {
-  printf("in registrar %s\n", name);
-  g_benchmarks.push_back(Benchmark{name, fn});
-    printf("size: %d\n", (int)g_benchmarks.size());
+  accessBenchmarks().push_back(Benchmark{name, fn});
 }
 
 int runMain(int argc, char **argv) {
-    printf("in runmain\n");
-
     selectTimer();
 
-    printf("size: %d\n", (int)g_benchmarks.size());
-    for (const auto& bm : g_benchmarks) {
+    for (const auto& bm : accessBenchmarks()) {
         printf("Running %s\n", bm.name);
     }
     return 0; 
