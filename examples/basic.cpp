@@ -4,8 +4,10 @@
 
 using namespace microbe;
 
-MICROBM(std_string_allocation_small) {
+MICROBE(std_string_allocation_small) {
+    printf("outside loop\n");
     for (auto _ : loop()) {
+        printf("inside loop\n");
         doNotOptimize(std::string{"small"});
     }
 }
