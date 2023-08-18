@@ -59,7 +59,7 @@ void evaluateTimer(const Timer &timer) {
   printf("evaluating timer: %s\n", timer.name);
 
   // If all of the values in 10000 entries are identical, the timer's precision
-  // is worse one microsecond, even if it can be evaluated in one cycle at 10
+  // is worse than one microsecond, even if it can be evaluated in one cycle at 10
   // GHz.
   constexpr size_t N = 10000;
   constexpr int64_t Limit =
